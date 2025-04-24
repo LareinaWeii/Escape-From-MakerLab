@@ -14,79 +14,131 @@ public class CameraMove : MonoBehaviour
 
     [Header("Movement Settings")]
     public float speed = 5f;
-    public float rotationSpeed = 30f; // Speed of camera rotation
-    public float screenEdgeThreshold = 0.1f; // 10% of the screen width    
+    public float rotationSpeed_Y = 30f; // Speed of camera rotation
+    public float rotationSpeed_X = 20f; // Speed of camera rotation
+    public float screenEdgeThreshold = 0.1f; // 10% of the screen width   
+    public float screenEdgeThreshold_H = 0.1f; // 10% of the screen height 
 
     [Header("References")]
     public HandPoseDetector detector;
     public Camera mainCamera;
+    public GameObject player;
 
     
     //movement
     private float currentSpeed = 0f;
 
     //rotation
-    private float currentRotationY = 0f; // Current Y-axis rotation
-    private float targetRotationY = 0f; // Target Y-axis rotation
+    private float TargetRotationY = 0f; // Target Y-axis rotation
+    private float CurrentRotationY = 0f; // Current Y-axis rotation
+
+    private float TargetRotationX = 0f; // Target X-axis rotation
+    private float CurrentRotationX = 0f; // Current X-axis rotation
+    
+
+    private RotationType camRotationDir = RotationType.NoRotation; // Type of rotation for the camera
+    enum RotationType
+    {
+        NoRotation = 0,
+        Left,
+        Right
+    }
+
+    void Start()
+    {
+        ;
+    }
 
     void Update()
     {
         HandPoseScriptableObject detectedPose = detector.GetCurrentlyDetectedPose();
         if (detectedPose != null)
         {
-            Debug.Log("Detected pose: " + detectedPose.name);
+            // Debug.Log("Detected pose: " + detectedPose.name);
             currentSpeed = speed;
         }
         else
         {
-            Debug.Log("No pose detected");
+            // Debug.Log("No pose detected");
             currentSpeed = 0f;
         }
         
 
-        targetRotationY = 0f; // Reset target rotation
-
          // Get the left hand's position in screen space
         if (leapServiceProvider != null && leapServiceProvider.CurrentFrame.Hands.Count > 0)
         {
-            if (leftHandWist != null)
+            if (leftHandWist != null || rightHandWist != null)
             {
                 // Convert Leap Motion's Vector to Unity's Vector3
                 Vector3 leftHandWorldPos = leftHandWist.transform.position;
                 Vector3 leftHandScreenPos = mainCamera.WorldToScreenPoint(leftHandWorldPos);
-                // Check if the left hand is in the leftmost 1/5 of the screen
+
+                Vector3 rightHandWorldPos = rightHandWist.transform.position;
+                Vector3 rightHandScreenPos = mainCamera.WorldToScreenPoint(rightHandWorldPos);
+
+                // Check Yaw Rotation
                 if (leftHandScreenPos.x <= Screen.width * screenEdgeThreshold)
                 {
-                    Debug.Log("Left hand is in the leftmost 1/5 of the screen");
-                    targetRotationY = -rotationSpeed;
+                    // Debug.Log("Left hand is in the leftmost 1/5 of the screen");
+                    TargetRotationY = -rotationSpeed_Y;
+                    TargetRotationX = 0f;
                     // // Rotate the camera to the left
                     // mainCamera.transform.Rotate(Vector3.up, -rotationSpeed * Time.deltaTime, Space.World);
                 }
-            }
-            if (rightHandWist != null)
-            {
-                // Convert Leap Motion's Vector to Unity's Vector3
-                Vector3 rightHandWorldPos = rightHandWist.transform.position;
-                Vector3 rightHandScreenPos = mainCamera.WorldToScreenPoint(rightHandWorldPos);
-                Debug.Log(rightHandScreenPos.x + " " + Screen.width * screenEdgeThreshold);
-                // Check if the left hand is in the leftmost 1/5 of the screen
-                if (rightHandScreenPos.x >= Screen.width * (1-screenEdgeThreshold))
+                else if (rightHandScreenPos.x >= Screen.width * (1-screenEdgeThreshold))
                 {
-                    Debug.Log("Right hand is in the righttmost 1/5 of the screen");
-                    targetRotationY = rotationSpeed;
+                    // Debug.Log("Right hand is in the righttmost 1/5 of the screen");
+                    TargetRotationY = rotationSpeed_Y;
+                    TargetRotationX = 0f;
                     // // Rotate the camera to the left
                     // mainCamera.transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
                 }
+                else
+                {
+                    // Debug.Log("No Y Rotation");
+                    TargetRotationY = 0f;
+                    float current_rotation_x = player.transform.rotation.eulerAngles.x;
+                    Debug.Log("Current Rotation X: " + current_rotation_x);
+
+                    // Check Pitch Rotation
+                    if (leftHandScreenPos.y <= Screen.height * screenEdgeThreshold_H)
+                    {
+                        Debug.Log("Hand is in the bottom 1/10 of the screen");
+                        if (current_rotation_x <= 20) TargetRotationX = rotationSpeed_X;
+                        else TargetRotationX = 0f;
+                    }
+                    else if (leftHandScreenPos.y >= Screen.height * (1-screenEdgeThreshold_H))
+                    {
+                        Debug.Log("Hand is in the top 1/10 of the screen");
+                        if ((current_rotation_x <= 360 && current_rotation_x >= 330) || 
+                            (current_rotation_x >= 0 && current_rotation_x < 20)) TargetRotationX = -rotationSpeed_X;
+                        else TargetRotationX = 0f;
+                    }
+                    else
+                    {
+                        Debug.Log("No X Rotation");
+                        TargetRotationX = 0f;
+                    }
+                }
+                
+                
+            }
+            else
+            {
+                TargetRotationX = 0f;
+                TargetRotationY = 0f;
             }
         }
 
         // Rotation
-        currentRotationY = Mathf.Lerp(currentRotationY, targetRotationY, Time.deltaTime * rotationSpeed);
-        mainCamera.transform.Rotate(Vector3.up, currentRotationY * Time.deltaTime, Space.World);
-        leapServiceProvider.transform.Rotate(Vector3.up, currentRotationY * Time.deltaTime, Space.World);
+        CurrentRotationY = Mathf.Lerp(CurrentRotationY, TargetRotationY, Time.deltaTime * rotationSpeed_Y);
+        CurrentRotationX = Mathf.Lerp(CurrentRotationX, TargetRotationX, Time.deltaTime * rotationSpeed_X);
+        player.transform.Rotate(Vector3.up, CurrentRotationY * Time.deltaTime, Space.Self);
+        player.transform.Rotate(Vector3.right, CurrentRotationX * Time.deltaTime, Space.Self);
+        // leapServiceProvider.transform.Rotate(Vector3.up, CamCurrentRotationY * Time.deltaTime, Space.World);
 
         // Movement
-        mainCamera.transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime, Space.World);
-        leapServiceProvider.transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime, Space.World);
+        player.transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime, Space.Self);
+        // leapServiceProvider.transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime, Space.Self);
     }
 }
