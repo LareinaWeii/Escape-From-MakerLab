@@ -20,7 +20,7 @@ public class CameraMove : MonoBehaviour
     public float screenEdgeThreshold_H = 0.1f; // 10% of the screen height 
 
     [Header("References")]
-    public HandPoseDetector detector;
+    public HandPoseDetector FistDetector;
     public Camera mainCamera;
     public GameObject player;
 
@@ -51,7 +51,7 @@ public class CameraMove : MonoBehaviour
 
     void Update()
     {
-        HandPoseScriptableObject detectedPose = detector.GetCurrentlyDetectedPose();
+        HandPoseScriptableObject detectedPose = FistDetector.GetCurrentlyDetectedPose();
         if (detectedPose != null)
         {
             // Debug.Log("Detected pose: " + detectedPose.name);
@@ -95,33 +95,28 @@ public class CameraMove : MonoBehaviour
                 }
                 else
                 {
-                    // Debug.Log("No Y Rotation");
                     TargetRotationY = 0f;
                     float current_rotation_x = player.transform.rotation.eulerAngles.x;
-                    Debug.Log("Current Rotation X: " + current_rotation_x);
 
                     // Check Pitch Rotation
                     if (leftHandScreenPos.y <= Screen.height * screenEdgeThreshold_H)
                     {
-                        Debug.Log("Hand is in the bottom 1/10 of the screen");
-                        if (current_rotation_x <= 20) TargetRotationX = rotationSpeed_X;
-                        else TargetRotationX = 0f;
+                        // Debug.Log("Hand is in the bottom 1/10 of the screen");
+                        if ((current_rotation_x > 20) && (current_rotation_x < 50)) TargetRotationX = 0f;
+                        else TargetRotationX = rotationSpeed_X;
                     }
                     else if (leftHandScreenPos.y >= Screen.height * (1-screenEdgeThreshold_H))
                     {
-                        Debug.Log("Hand is in the top 1/10 of the screen");
-                        if ((current_rotation_x <= 360 && current_rotation_x >= 330) || 
-                            (current_rotation_x >= 0 && current_rotation_x < 20)) TargetRotationX = -rotationSpeed_X;
-                        else TargetRotationX = 0f;
+                        // Debug.Log("Hand is in the top 1/10 of the screen");
+                        if ((current_rotation_x < 340) && (current_rotation_x > 320)) TargetRotationX = 0f;
+                        else TargetRotationX = -rotationSpeed_X;
                     }
                     else
                     {
-                        Debug.Log("No X Rotation");
+                        // Debug.Log("No X Rotation");
                         TargetRotationX = 0f;
                     }
                 }
-                
-                
             }
             else
             {

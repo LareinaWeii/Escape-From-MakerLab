@@ -21,9 +21,14 @@ public class FlipColor : MonoBehaviour
     public int gridWidth = 5; // Set this to your grid width
     public int gridHeight = 5; // Set this to your grid height
 
+    private MainSystem mainSystem; // Reference to the main system
+
+
     // Start is called before the first frame update
     void Start()
     {
+        mainSystem = GameObject.Find("Game Manager").GetComponent<MainSystem>();
+
         // Get all cubes
         cubes = new List<GameObject>();
         foreach (Transform child in transform) // Iterate through all direct children
@@ -46,6 +51,12 @@ public class FlipColor : MonoBehaviour
             }
         }
 
+        if (detector == null)
+        {
+            Debug.LogError("HandPoseDetector not found in the scene. Please add it to the scene.");
+            detector = FindObjectOfType<HandPoseDetector>();
+        }
+
     }
     void Update()
     {
@@ -58,14 +69,15 @@ public class FlipColor : MonoBehaviour
             {
                 if (cubeRenderer.material.color != Color.white)
                 {
-                    // Debug.Log("A Cube is selected");
+                    Debug.Log("A Cube is selected");
                     cubeRenderer.material = new Material(cubeRenderer.material); // Create a new instance of the material
                     cubeRenderer.material.color = Color.white; //Highlight the cube
                 }
                 noCubeIsSelected = false; // Set the flag to true
                 HandPoseScriptableObject detectedPose = detector.GetCurrentlyDetectedPose();
-                if (detectedPose != null && detectedPose.name == "Point")
+                if (detectedPose != null)
                 {
+                    Debug.Log("Detected pose: " + detectedPose.name);
                     targetCube = cube; // Set the target cube to the currently selected cube
                     Debug.Log("Target Cube: " + targetCube.name);
                 }
@@ -96,10 +108,12 @@ public class FlipColor : MonoBehaviour
         if(finished)
         {
             Debug.Log("Finished changing color!");
+            StartCoroutine(WaitForSeconds(5f));
+            mainSystem.ReturnToMainScene();
         }
         else
         {
-            Debug.Log("Not finished changing color!");
+            // Debug.Log("Not finished changing color!");
         }
 
         // if(CheckFinished())
@@ -219,5 +233,10 @@ public class FlipColor : MonoBehaviour
         Flip(row-1, col, originalMaterial, newMaterial); // Check the cube above
         Flip(row+1, col, originalMaterial, newMaterial); // Check the cube below
 
+    }
+
+    private IEnumerator WaitForSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
     }
 }

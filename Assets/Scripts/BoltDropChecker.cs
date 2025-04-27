@@ -15,6 +15,22 @@ public class BoltDropChecker : MonoBehaviour
     [Header("Hole")]
     public GameObject boltHole;
 
+    private MainSystem mainSystem;
+    private bool isFinished = false;
+
+    void Start()
+    {
+        mainSystem = GameObject.Find("Game Manager").GetComponent<MainSystem>();
+    }
+
+    void Update()
+    {
+        if (isFinished)
+        {
+            mainSystem.ReturnToMainScene();
+        }    
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         Debug.Log("Collision entered with: " + collision.gameObject.name);
@@ -23,13 +39,10 @@ public class BoltDropChecker : MonoBehaviour
             Debug.Log("Right bolt!");
             if (boltHole != null)
             {
-                PlaceCorrectBolt(collision.gameObject);
+                StartCoroutine(PlaceCorrectBolt(collision.gameObject));
             }
         }
-        else
-        {
-            Debug.Log("Wrong bolt!");
-        }
+        else Debug.Log("Wrong bolt!");
     }
 
 
@@ -39,7 +52,7 @@ public class BoltDropChecker : MonoBehaviour
         else return false;
     }
 
-    void PlaceCorrectBolt(GameObject bolt)
+    private IEnumerator PlaceCorrectBolt(GameObject bolt)
     {
         Destroy(bolt);
         Destroy(boltHole);
@@ -48,5 +61,8 @@ public class BoltDropChecker : MonoBehaviour
         {
             realBoltToActivate.SetActive(true);
         }
+
+        yield return new WaitForSeconds(5f);
+        isFinished = true;
     }
 }
