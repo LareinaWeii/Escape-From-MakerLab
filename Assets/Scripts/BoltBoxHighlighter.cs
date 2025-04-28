@@ -39,7 +39,7 @@ public class BoltBoxHighlighter : MonoBehaviour
         if (player == null || boltBoxMaterials.Count == 0) return;
 
         float distance = Vector3.Distance(player.position, transform.position);
-        Debug.Log("BoltBox Distance to player: " + distance);
+        // Debug.Log("BoltBox Distance to player: " + distance);
 
         if (distance <= highlightDistance && !isHighlighted)
         {

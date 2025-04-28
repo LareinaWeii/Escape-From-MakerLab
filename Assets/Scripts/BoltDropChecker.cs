@@ -27,6 +27,7 @@ public class BoltDropChecker : MonoBehaviour
     {
         if (isFinished)
         {
+            mainSystem.gamePass[0] = 1;
             mainSystem.ReturnToMainScene();
         }    
     }

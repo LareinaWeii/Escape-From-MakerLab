@@ -46,7 +46,7 @@ public class ColorfulCabiantHighlighter : MonoBehaviour
         if (player == null || CabiantMaterials.Count == 0) return;
 
         float distance = Vector3.Distance(player.position, transform.position);
-        Debug.Log("Cabiant Distance to player: " + distance);
+        // Debug.Log("Cabiant Distance to player: " + distance);
 
         if (distance <= highlightDistance && !isHighlighted)
         {

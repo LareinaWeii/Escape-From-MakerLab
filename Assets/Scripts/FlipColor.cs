@@ -107,6 +107,7 @@ public class FlipColor : MonoBehaviour
         
         if(finished)
         {
+            mainSystem.gamePass[2] = 1;
             Debug.Log("Finished changing color!");
             StartCoroutine(WaitForSeconds(5f));
             mainSystem.ReturnToMainScene();
