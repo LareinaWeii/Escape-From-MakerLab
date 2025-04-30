@@ -50,12 +50,24 @@ public class MenuManage : MonoBehaviour
     }
     public void Update()
     {
+        //Skip the opening screen if the user presses the Escape key
+        if (Input.GetKeyDown(KeyCode.Space) && isOpeningScreen)
+        {
+            Debug.Log("Space key pressed. Skipping opening screen.");
+            openingScreen.SetActive(false);
+            BlackBackground.SetActive(false);
+        }
         if(openingScreen.activeSelf & Input.GetMouseButtonDown(0) & !easterEggerIsTriggered)
         {
-            if (Random.value <= chanceToShow)
+            HandPoseScriptableObject detectedPose = detector.GetCurrentlyDetectedPose();
+            if(detectedPose != null)
             {
                 TriggerEasterEgg();
             }
+            // if (Random.value <= chanceToShow)
+            // {
+            //     TriggerEasterEgg();
+            // }
             // StartCoroutine(ShowEsterEgg());
                 
         }

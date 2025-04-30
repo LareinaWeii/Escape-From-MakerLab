@@ -11,6 +11,7 @@ public class BagManage : MonoBehaviour
     public GameObject bag;
     public HandPoseDetector detector;
     public List<GameObject> objects; // Reference to the object1
+    public bool isBagOpen = false; // Flag to check if the bag is open
     private Dictionary<GameObject, Vector3> lastKnownPositions = new Dictionary<GameObject, Vector3>(); // Store last positions of objects on the platform
     #endregion
 
@@ -59,7 +60,7 @@ public class BagManage : MonoBehaviour
         //         return; // Exit the method if there is a collision
         //     }
         // }
-
+        isBagOpen = true;
         // Activate the platform
         plateform.SetActive(true);
 
@@ -67,9 +68,10 @@ public class BagManage : MonoBehaviour
         foreach (GameObject obj in objects)
         {
             Debug.Log(obj.name);
-            if (obj != null)
+            if (obj != null && obj.CompareTag("InBag"))
             {
-                // obj.transform.position = plateform.transform.position + lastKnownPositions[obj];
+
+                obj.transform.position = plateform.transform.position + lastKnownPositions[obj];
                 obj.SetActive(true); // Activate the object
             }
         }
@@ -91,32 +93,6 @@ public class BagManage : MonoBehaviour
         }
         plateform.SetActive(false); // Deactivate the platform
         Debug.Log("Bag closed");
-    }
-    public void SwitchBagObj()
-    {
-        // Check if the detector has detected a pose
-        HandPoseScriptableObject detectedPose = detector.GetCurrentlyDetectedPose();
-        if (detectedPose != null && detectedPose.name == "Point")
-        {
-            Debug.Log("Detected pose: Point");
-
-            // Find the currently active object in the bag
-            GameObject currentActiveObject = objects.Find(obj => obj.activeSelf);
-
-            // Deactivate the currently active object
-            if (currentActiveObject != null)
-            {
-                currentActiveObject.SetActive(false);
-                Debug.Log("Deactivated object: " + currentActiveObject.name);
-            }
-
-            // Activate the first object in the list
-            if (objects.Count > 0 && objects[0] != null)
-            {
-                objects[0].SetActive(true);
-                Debug.Log("Activated object: " + objects[0].name);
-            }
-        }
     }
     #endregion
 
