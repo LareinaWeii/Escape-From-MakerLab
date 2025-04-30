@@ -25,6 +25,7 @@ public class CameraMove : MonoBehaviour
     public GameObject player;
     public GameObject playerCam; // The camera that follows the player
 
+    private BagManage bagManage;
     
     //movement
     private float currentSpeed = 0f;
@@ -47,7 +48,7 @@ public class CameraMove : MonoBehaviour
 
     void Start()
     {
-        ;
+        bagManage = GameObject.Find("BagManager").GetComponent<BagManage>();
     }
 
     void Update()
@@ -97,7 +98,7 @@ public class CameraMove : MonoBehaviour
                 else
                 {
                     TargetRotationY = 0f;
-                    float current_rotation_x = player.transform.rotation.eulerAngles.x;
+                    float current_rotation_x = playerCam.transform.rotation.eulerAngles.x;
 
                     // Check Pitch Rotation
                     if (leftHandScreenPos.y <= Screen.height * screenEdgeThreshold_H)
@@ -126,15 +127,18 @@ public class CameraMove : MonoBehaviour
             }
         }
 
-        // Rotation
-        CurrentRotationY = Mathf.Lerp(CurrentRotationY, TargetRotationY, Time.deltaTime * rotationSpeed_Y);
-        CurrentRotationX = Mathf.Lerp(CurrentRotationX, TargetRotationX, Time.deltaTime * rotationSpeed_X);
-        player.transform.Rotate(Vector3.up, CurrentRotationY * Time.deltaTime, Space.Self);
-        playerCam.transform.Rotate(Vector3.right, CurrentRotationX * Time.deltaTime, Space.Self);
-        // leapServiceProvider.transform.Rotate(Vector3.up, CamCurrentRotationY * Time.deltaTime, Space.World);
+        if(!bagManage.isBagOpen)
+        {
+            // Rotation
+            CurrentRotationY = Mathf.Lerp(CurrentRotationY, TargetRotationY, Time.deltaTime * rotationSpeed_Y);
+            CurrentRotationX = Mathf.Lerp(CurrentRotationX, TargetRotationX, Time.deltaTime * rotationSpeed_X);
+            player.transform.Rotate(Vector3.up, CurrentRotationY * Time.deltaTime, Space.Self);
+            playerCam.transform.Rotate(Vector3.right, CurrentRotationX * Time.deltaTime, Space.Self);
+            // leapServiceProvider.transform.Rotate(Vector3.up, CamCurrentRotationY * Time.deltaTime, Space.World);
 
-        // Movement
-        player.transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime, Space.Self);
-        // leapServiceProvider.transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime, Space.Self);
+            // Movement
+            player.transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime, Space.Self);
+            // leapServiceProvider.transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime, Space.Self);
+        }
     }
 }

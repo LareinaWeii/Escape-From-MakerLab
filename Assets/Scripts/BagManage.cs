@@ -9,9 +9,11 @@ public class BagManage : MonoBehaviour
     #region Variables
     public GameObject plateform;
     public GameObject bag;
+    public GameObject player;
     public HandPoseDetector detector;
     public List<GameObject> objects; // Reference to the object1
     public bool isBagOpen = false; // Flag to check if the bag is open
+    private Vector3 diffOfPlateformAndPlayer; // Distance between the platform and the player
     private Dictionary<GameObject, Vector3> lastKnownPositions = new Dictionary<GameObject, Vector3>(); // Store last positions of objects on the platform
     #endregion
 
@@ -19,11 +21,11 @@ public class BagManage : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // diffOfPlateformAndPlayer = plateform.transform.position - player.transform.position; // Calculate the distance between the platform and the player
         //Get all objects in bag
-        
         foreach (GameObject obj in objects)
         {
-            if (obj != null)
+            if (obj != null && obj.CompareTag("InBag"))
             {
                 lastKnownPositions[obj] = obj.transform.position - plateform.transform.position; // Store the last known position of the object
             }
@@ -35,13 +37,14 @@ public class BagManage : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // CheckObjInOutBag();
+        CheckObjInOutBag();
     }
     #endregion
 
     #region Public Methods
     public void OpenBag()
     {
+        //TODO: check if the bag cannot open
         // Define the region around the platform to check for collisions
         // Vector3 platformCenter = plateform.transform.position;
         // Vector3 platformSize = plateform.GetComponent<Collider>().bounds.size; // Get the platform's size
@@ -62,15 +65,14 @@ public class BagManage : MonoBehaviour
         // }
         isBagOpen = true;
         // Activate the platform
+        // plateform.transform.position = player.transform.position + diffOfPlateformAndPlayer; // Set the platform position to the player's position
         plateform.SetActive(true);
 
         // Move objects to their last known positions on the platform
         foreach (GameObject obj in objects)
         {
-            Debug.Log(obj.name);
             if (obj != null && obj.CompareTag("InBag"))
             {
-
                 obj.transform.position = plateform.transform.position + lastKnownPositions[obj];
                 obj.SetActive(true); // Activate the object
             }
@@ -81,17 +83,18 @@ public class BagManage : MonoBehaviour
 
     public void CloseBag()
     {
-
-        plateform.SetActive(false);
+        // CheckObjInOutBag(); // Check if objects are in or out of the bag
+        // Deactivate the platform and objects
         foreach (GameObject obj in objects)
         {
-            if (obj != null && IsObjectOnPlate(obj))
+            if (obj != null && obj.CompareTag("InBag"))
             {
                 lastKnownPositions[obj] = obj.transform.position - plateform.transform.position; // Store the last known position of the object
+                obj.SetActive(false); // Deactivate the object
             }
-            obj.SetActive(false); // Deactivate the object
         }
         plateform.SetActive(false); // Deactivate the platform
+        isBagOpen = false; // Set the bag as closed
         Debug.Log("Bag closed");
     }
     #endregion
@@ -99,41 +102,25 @@ public class BagManage : MonoBehaviour
     #region Private Methods
     private void CheckObjInOutBag()
     {
-        // Define the region around the platform to check for objects
-        Vector3 platformCenter = plateform.transform.position;
-        Vector3 platformSize = plateform.GetComponent<Collider>().bounds.size; // Get the platform's size
-        // float checkHeight = 1.0f; // Height above the platform to check for objects
-        Vector3 checkRegion = new Vector3(platformSize.x, platformSize.y, platformSize.z);
-
-        // Check for objects in the region around the platform
-        Collider[] colliders = Physics.OverlapBox(platformCenter, checkRegion / 2, Quaternion.identity);
-        foreach (Collider collider in colliders)
+        Collider plateformCollider = plateform.GetComponent<Collider>();
+        // Update in bag or not tags
+        foreach (GameObject obj in objects)
         {
-            GameObject obj = collider.gameObject;
-
-            // Check if the object is in the bag list, has the "Fetchable" tag, and is not already in bagObjects
-            if (objects.Contains(obj) && obj.CompareTag("Fetchable") && !objects.Contains(obj))
+            if(obj != null && obj.activeSelf)
             {
-                // Add the object to the bagObjects list
-                objects.Add(obj);
-                Debug.Log("Object added to bagObjects: " + obj.name);
+                Collider objCollider = obj.GetComponent<Collider>();
+                Debug.Log(objCollider.bounds.Intersects(plateformCollider.bounds));
+                if(objCollider != null && plateformCollider != null && objCollider.bounds.Intersects(plateformCollider.bounds))
+                {
+                    obj.tag = "InBag"; // Set the tag to "InBag" if the object is on the platform
+                }
+                else
+                {
+                    obj.tag = "Fetchable"; // Set the tag to "Fetchable" if the object is not on the platform
+                }
             }
         }
 
-        // Remove objects from bagObjects if they are no longer on the plate
-        objects.RemoveAll(obj => !IsObjectOnPlate(obj));
-    }
-
-    // Helper function to check if an object is on the plate
-    private bool IsObjectOnPlate(GameObject obj)
-    {
-        if (obj == null) return false;
-
-        // Get the bounds of the plateform
-        Bounds plateBounds = plateform.GetComponent<Collider>().bounds;
-
-        // Check if the object's position is within the bounds of the plateform
-        return plateBounds.Contains(obj.transform.position);
     }
     
     #endregion
