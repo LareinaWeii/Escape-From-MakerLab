@@ -105,7 +105,7 @@ public class FlipColor : MonoBehaviour
         }
 
         
-        if(finished)
+        if(finished || Input.GetKeyDown(KeyCode.Alpha3))
         {
             mainSystem.gamePass[2] = 1;
             Debug.Log("Finished changing color!");

@@ -23,6 +23,7 @@ public class CameraMove : MonoBehaviour
     public HandPoseDetector FistDetector;
     public Camera mainCamera;
     public GameObject player;
+    public GameObject playerCam; // The camera that follows the player
 
     
     //movement
@@ -129,7 +130,7 @@ public class CameraMove : MonoBehaviour
         CurrentRotationY = Mathf.Lerp(CurrentRotationY, TargetRotationY, Time.deltaTime * rotationSpeed_Y);
         CurrentRotationX = Mathf.Lerp(CurrentRotationX, TargetRotationX, Time.deltaTime * rotationSpeed_X);
         player.transform.Rotate(Vector3.up, CurrentRotationY * Time.deltaTime, Space.Self);
-        player.transform.Rotate(Vector3.right, CurrentRotationX * Time.deltaTime, Space.Self);
+        playerCam.transform.Rotate(Vector3.right, CurrentRotationX * Time.deltaTime, Space.Self);
         // leapServiceProvider.transform.Rotate(Vector3.up, CamCurrentRotationY * Time.deltaTime, Space.World);
 
         // Movement

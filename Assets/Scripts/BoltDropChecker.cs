@@ -25,7 +25,7 @@ public class BoltDropChecker : MonoBehaviour
 
     void Update()
     {
-        if (isFinished)
+        if (isFinished || Input.GetKeyDown(KeyCode.Alpha1))
         {
             mainSystem.gamePass[0] = 1;
             mainSystem.ReturnToMainScene();

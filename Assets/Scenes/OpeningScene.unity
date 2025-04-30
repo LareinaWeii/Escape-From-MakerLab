@@ -9700,6 +9700,7 @@ MonoBehaviour:
   detector: {fileID: 304311288175572267}
   objects:
   - {fileID: 299321839}
+  isBagOpen: 0
 --- !u!4 &3761024620602732144
 Transform:
   m_ObjectHideFlags: 0

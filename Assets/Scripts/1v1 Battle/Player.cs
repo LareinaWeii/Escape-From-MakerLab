@@ -50,7 +50,7 @@ public class NewBehaviourScript : LivingEntilty
 
         StartCoroutine(CheckFinish());
 
-        if (isFinished)
+        if (isFinished || Input.GetKeyDown(KeyCode.Alpha2))
         {
             mainSystem.gamePass[1] = 1;
             mainSystem.ReturnToMainScene();
