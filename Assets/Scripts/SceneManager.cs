@@ -31,5 +31,11 @@ public class SceneSwitcher : MonoBehaviour
             }
         }
     }
+    public void ReloadScene()
+    {
+
+        Debug.Log("Reloading scene...");
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
 }

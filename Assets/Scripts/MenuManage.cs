@@ -8,6 +8,9 @@ using Leap;
 public class MenuManage : MonoBehaviour
 {
     #region Variables
+    [Header("-----------UI Elements-----------")]
+    public GameObject hintText; // Reference to the hint text UI element
+
     [Header("----------Menu Screen--------")] 
     public RectTransform optionArea;
     public GameObject background;
@@ -93,6 +96,12 @@ public class MenuManage : MonoBehaviour
         openingScreen.SetActive(false);
         BlackBackground.SetActive(false);
         // yield return StartCoroutine(ShowMainMenu());
+
+        if(hintText != null)
+        {
+            hintText.SetActive(true);
+            Debug.Log("Click right hand button to open the bag");
+        }
     }
 
     private void TriggerEasterEgg()
