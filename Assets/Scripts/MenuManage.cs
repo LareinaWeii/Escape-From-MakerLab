@@ -12,11 +12,12 @@ public class MenuManage : MonoBehaviour
     public GameObject hintText; // Reference to the hint text UI element
 
     [Header("----------Menu Screen--------")] 
-
     public GameObject background;
     public GameObject mainMenu;
     public GameObject openingScreen;
     public GameObject BlackBackground;
+    public GameObject StoryScreen;
+    public GameObject StoryScreen2;
     public GameObject card;
     public GameObject cardReader;
     public GameObject TutScreen1;
@@ -28,6 +29,7 @@ public class MenuManage : MonoBehaviour
     public List<Sprite> easterEggSprites;
     [Header("-----------Others-----------")]
     public float splashDuration = 2.0f;
+    public float storySplashDuration = 4.0f;
     public float fadeDuration = 1.0f;
     public float TutSplashDuration = 5.0f;
     [Header("----------Private--------")]
@@ -35,6 +37,8 @@ public class MenuManage : MonoBehaviour
     private CanvasGroup mainMenuCanvasGroup;
     private CanvasGroup openingCanvasGroup;
     private CanvasGroup easterEggCanvasGroup;
+    private CanvasGroup StoryScreenCanvasGroup;
+    private CanvasGroup StoryScreen2CanvasGroup;
     private CanvasGroup blackBackgroundCanvasGroup;
     private CanvasGroup TutScreen1CanvasGroup;
     private CanvasGroup TutScreen2CanvasGroup;
@@ -45,6 +49,7 @@ public class MenuManage : MonoBehaviour
     private bool isTut1OpenedFlag = false;// control tut1 open once(no use, controled by opening scene, opening scene open once, tut1 screen open once)
     private bool isTut2OpenedFlag = false;// control tut2 open once
     public bool isTutScreenOpenedFlag = false;
+    public bool isStoryScreen2OpenedFlag = false;
 
 
     #endregion
@@ -58,11 +63,16 @@ public class MenuManage : MonoBehaviour
         mainMenuCanvasGroup = mainMenu.GetComponent<CanvasGroup>();
         BGCanvasGroup = background.GetComponent<CanvasGroup>();
         blackBackgroundCanvasGroup = BlackBackground.GetComponent<CanvasGroup>();
+        StoryScreenCanvasGroup = StoryScreen.GetComponent<CanvasGroup>();
+        StoryScreen2CanvasGroup = StoryScreen2.GetComponent<CanvasGroup>();
+
         TutScreen1CanvasGroup = TutScreen1.GetComponent<CanvasGroup>();
         TutScreen2CanvasGroup = TutScreen2.GetComponent<CanvasGroup>();
 
         background.SetActive(false);
         openingScreen.SetActive(true);
+        StoryScreen.SetActive(false);
+        StoryScreen2.SetActive(false);
         BlackBackground.SetActive(true);
         TutScreen1.SetActive(false);
         TutScreen2.SetActive(false);
@@ -95,6 +105,7 @@ public class MenuManage : MonoBehaviour
             StartCoroutine(ShowTutScreen2());
             isTut2OpenedFlag = true;
         }
+
         
     }
     #endregion
@@ -112,17 +123,75 @@ public class MenuManage : MonoBehaviour
         }
         // Fade out the opening screen and black background
         yield return StartCoroutine(FadeCanvasGroup(openingCanvasGroup, 1f, 0f, splashDuration));
-        yield return StartCoroutine(FadeCanvasGroup(blackBackgroundCanvasGroup, 1f, 0f, splashDuration));
         openingScreen.SetActive(false);
-        BlackBackground.SetActive(false);
         isOpeningScreen = false;
         // yield return StartCoroutine(ShowMainMenu());
-        TutScreen1.SetActive(true);
 
-        StartCoroutine(ShowTutScreen1());
-
+        //Start Story Screen
+        StoryScreen.SetActive(true);
+        StartCoroutine(ShowStoryScreen());
     }
 
+    private IEnumerator ShowStoryScreen()
+    {   
+        Debug.Log("ShowStoryScreen called");
+
+        // Fade in the opening screen
+        yield return StartCoroutine(FadeCanvasGroup(StoryScreenCanvasGroup, 0f, 1f, fadeDuration));
+        // yield return new WaitForSeconds(storySplashDuration);
+
+        // Wait for the story splash duration or skip if 'S' is pressed
+        float elapsedTime = 0f;
+        while (elapsedTime < storySplashDuration)
+        {
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                Debug.Log("S key pressed. Skipping story screen.");
+                break; // Exit the loop early to skip
+            }
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+                
+        // Fade out the opening screen and black background
+        yield return StartCoroutine(FadeCanvasGroup(StoryScreenCanvasGroup, 1f, 0f, fadeDuration));
+        StoryScreen.SetActive(false);
+
+        StoryScreen2.SetActive(true);
+        StartCoroutine(ShowStoryScreen2());
+    }
+
+    private IEnumerator ShowStoryScreen2()
+    {   
+        Debug.Log("ShowStoryScreen called");
+        isStoryScreen2OpenedFlag = true;
+        // Fade in the opening screen
+        yield return StartCoroutine(FadeCanvasGroup(StoryScreen2CanvasGroup, 0f, 1f, fadeDuration));
+        // yield return new WaitForSeconds(storySplashDuration);
+
+        // Wait for the story splash duration or skip if 'S' is pressed
+        float elapsedTime = 0f;
+        while (elapsedTime < storySplashDuration)
+        {
+            if (Input.GetKeyDown(KeyCode.S))
+            {
+                Debug.Log("S key pressed. Skipping story screen.");
+                break; // Exit the loop early to skip
+            }
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        // Fade out the opening screen and black background
+        yield return StartCoroutine(FadeCanvasGroup(StoryScreen2CanvasGroup, 1f, 0f, fadeDuration));
+        yield return StartCoroutine(FadeCanvasGroup(blackBackgroundCanvasGroup, 1f, 0f, splashDuration));
+        BlackBackground.SetActive(false);
+
+        StoryScreen2.SetActive(false);
+
+        TutScreen1.SetActive(true);
+        StartCoroutine(ShowTutScreen1());
+    }
     private IEnumerator ShowTutScreen1()
     {   
         Debug.Log("ShowTutScreen1() called");

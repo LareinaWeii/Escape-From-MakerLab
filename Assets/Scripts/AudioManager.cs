@@ -19,6 +19,7 @@ public class AudioManager : MonoBehaviour
     public AudioClip clickClip; // 点击音效
     public AudioClip FairyClip; // 仙女音效
     public AudioClip OpenDoorClip; // 开场音效
+    public AudioClip ShootingClip; // 射击音效
     // public AudioSource musicSource; // 用于播放背景音乐的 AudioSource
 
     [Header("-------------Others-------------")]
@@ -32,7 +33,7 @@ public class AudioManager : MonoBehaviour
     private bool playOnceFlag = true; // Flag to control the play once of opening screen BGM
     private bool hasPlayedFairyClip = false; // Flag to ensure FairyClip plays only once
     private bool hasPlayedDoorClip = false;
-
+    private bool hasPlayedShootingClip = false; // Flag to ensure shooting sound plays only once
 
     private void Awake()
     {
@@ -100,6 +101,12 @@ public class AudioManager : MonoBehaviour
         {
             PlaySfx(OpenDoorClip); // 播放游戏场景背景音乐
             hasPlayedDoorClip = true; // Set the flag to true to prevent repeated calls
+        }
+
+        if(MenuManageScript.isStoryScreen2OpenedFlag && !hasPlayedShootingClip)
+        {
+            PlaySfx(ShootingClip); // 播放游戏场景背景音乐
+            hasPlayedShootingClip = true; // Set the flag to true to prevent repeated calls
         }
     }
 
