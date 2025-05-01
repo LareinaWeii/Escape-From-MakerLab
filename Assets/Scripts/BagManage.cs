@@ -64,6 +64,7 @@ public class BagManage : MonoBehaviour
         //     }
         // }
         isBagOpen = true;
+
         // Activate the platform
         // plateform.transform.position = player.transform.position + diffOfPlateformAndPlayer; // Set the platform position to the player's position
         plateform.SetActive(true);
@@ -95,7 +96,6 @@ public class BagManage : MonoBehaviour
         }
         plateform.SetActive(false); // Deactivate the platform
         isBagOpen = false; // Set the bag as closed
-        Debug.Log("Bag closed");
     }
     #endregion
 
@@ -109,7 +109,6 @@ public class BagManage : MonoBehaviour
             if(obj != null && obj.activeSelf)
             {
                 Collider objCollider = obj.GetComponent<Collider>();
-                Debug.Log(objCollider.bounds.Intersects(plateformCollider.bounds));
                 if(objCollider != null && plateformCollider != null && objCollider.bounds.Intersects(plateformCollider.bounds))
                 {
                     obj.tag = "InBag"; // Set the tag to "InBag" if the object is on the platform

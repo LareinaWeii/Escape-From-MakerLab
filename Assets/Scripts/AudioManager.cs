@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class AudioManager : MonoBehaviour
 {
@@ -16,12 +17,23 @@ public class AudioManager : MonoBehaviour
     public AudioClip openingBgm; // Bgm for opening screen
     public AudioClip openingEggBgm; // Bgm for opening screen of Egg
     public AudioClip clickClip; // 点击音效
+    public AudioClip FairyClip; // 仙女音效
+    public AudioClip OpenDoorClip; // 开场音效
     // public AudioSource musicSource; // 用于播放背景音乐的 AudioSource
 
     [Header("-------------Others-------------")]
     public GameObject menuCanvas;
     public MenuManage menuManage;
-    public GameObject openingScreen;
+    private GameObject openingScreen;
+    private MenuManage MenuManageScript;
+    private SceneSwitcher SceneManagerScript; //Careful that SceneManager.cs's class name is SceneSwitcher, not SceneManager
+
+    [Header("-------------Flags-------------")]
+    private bool playOnceFlag = true; // Flag to control the play once of opening screen BGM
+    private bool hasPlayedFairyClip = false; // Flag to ensure FairyClip plays only once
+    private bool hasPlayedDoorClip = false;
+
+
     private void Awake()
     {
         // 如果已经存在一个 AudioManager 实例，则销毁当前的
@@ -38,28 +50,56 @@ public class AudioManager : MonoBehaviour
 
     private void Start()
     {   
+        MenuManageScript = GameObject.Find("Menu Manager").GetComponent<MenuManage>();
+        SceneManagerScript = GameObject.Find("SceneManager").GetComponent<SceneSwitcher>();
+        openingScreen = MenuManageScript.openingScreen;
         
-        // // 默认播放菜单背景音乐
-        // if (gameBgm != null)
-        // {
-        //     PlayBgm(gameBgm);
-        // }
     }
 
     private void Update()
     {
-        if(openingScreen != null)
+        if(MenuManageScript.isOpeningScreen)
         {
-
-            if (openingScreen.activeSelf && !menuManage.easterEggerIsTriggered)
+            if(playOnceFlag)
             {
-                PlayBgm(openingBgm);
+                if (openingScreen.activeSelf && !menuManage.easterEggerIsTriggered)
+                {
+                    // PlayBgm(openingBgm);
+                    PlaySfx(openingBgm); // 播放点击音效
+                }
+
+                else if (openingScreen.activeSelf && menuManage.easterEggerIsTriggered)
+                {
+                    PlayBgm(openingEggBgm);
+                }
+
+                playOnceFlag = false; // Reset the flag to prevent repeated calls
             }
 
-            else if (openingScreen.activeSelf && menuManage.easterEggerIsTriggered)
+        }
+        else
+        {
+            PlayBgm(gameBgm); // 播放游戏场景背景音乐
+        }
+
+
+        if(MenuManageScript.isTutScreenOpenedFlag)
+        {
+            if(!hasPlayedFairyClip)
             {
-                PlayBgm(openingEggBgm);
+                PlaySfx(FairyClip); // 播放游戏场景背景音乐
+                hasPlayedFairyClip = true; // Set the flag to true to prevent repeated calls
             }
+        }
+        else
+        {
+            hasPlayedFairyClip = false; // Reset the flag when the tutorial screen is closed
+        }
+
+        if(SceneManagerScript.isOpeningScreenPassed && !hasPlayedDoorClip)
+        {
+            PlaySfx(OpenDoorClip); // 播放游戏场景背景音乐
+            hasPlayedDoorClip = true; // Set the flag to true to prevent repeated calls
         }
     }
 
@@ -70,6 +110,8 @@ public class AudioManager : MonoBehaviour
         musicSource.clip = clip;
         musicSource.Play();
     }
+
+
     public void PlaySfx(AudioClip clip)
     {
         sfxSource.PlayOneShot(clip);

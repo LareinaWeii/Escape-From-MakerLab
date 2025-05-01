@@ -12,14 +12,15 @@ public class MenuManage : MonoBehaviour
     public GameObject hintText; // Reference to the hint text UI element
 
     [Header("----------Menu Screen--------")] 
-    public RectTransform optionArea;
+
     public GameObject background;
     public GameObject mainMenu;
-    public GameObject optionMenu;
     public GameObject openingScreen;
     public GameObject BlackBackground;
     public GameObject card;
     public GameObject cardReader;
+    public GameObject TutScreen1;
+    public GameObject TutScreen2;
     public HandPoseDetector detector;
     // public GameObject easterEgg; //Easter Egg for opening screen
     [Header("----------Easter Egg Trigger--------")]
@@ -27,29 +28,48 @@ public class MenuManage : MonoBehaviour
     public List<Sprite> easterEggSprites;
     [Header("-----------Others-----------")]
     public float splashDuration = 2.0f;
+    public float fadeDuration = 1.0f;
+    public float TutSplashDuration = 5.0f;
     [Header("----------Private--------")]
     private CanvasGroup BGCanvasGroup;
     private CanvasGroup mainMenuCanvasGroup;
     private CanvasGroup openingCanvasGroup;
     private CanvasGroup easterEggCanvasGroup;
     private CanvasGroup blackBackgroundCanvasGroup;
+    private CanvasGroup TutScreen1CanvasGroup;
+    private CanvasGroup TutScreen2CanvasGroup;
     public bool easterEggerIsTriggered = false;
-    private bool isOpeningScreen = false;
+    private BagManage BagManageScript;
+    [Header("----------Flags--------")]
+    public bool isOpeningScreen = true;
+    private bool isTut1OpenedFlag = false;// control tut1 open once(no use, controled by opening scene, opening scene open once, tut1 screen open once)
+    private bool isTut2OpenedFlag = false;// control tut2 open once
+    public bool isTutScreenOpenedFlag = false;
+
+
     #endregion
     #region Behaviours Methods
     public void Start()
     {
+        isTutScreenOpenedFlag = false;
+        BagManageScript = GameObject.Find("BagManager").GetComponent<BagManage>();
+
         openingCanvasGroup = openingScreen.GetComponent<CanvasGroup>();
         mainMenuCanvasGroup = mainMenu.GetComponent<CanvasGroup>();
         BGCanvasGroup = background.GetComponent<CanvasGroup>();
         blackBackgroundCanvasGroup = BlackBackground.GetComponent<CanvasGroup>();
+        TutScreen1CanvasGroup = TutScreen1.GetComponent<CanvasGroup>();
+        TutScreen2CanvasGroup = TutScreen2.GetComponent<CanvasGroup>();
 
         background.SetActive(false);
         openingScreen.SetActive(true);
         BlackBackground.SetActive(true);
-        
+        TutScreen1.SetActive(false);
+        TutScreen2.SetActive(false);
 
-        if(!isOpeningScreen) StartCoroutine(ShowOpeningScreen());
+        // if(!isOpeningScreen) StartCoroutine(ShowOpeningScreen());
+        StartCoroutine(ShowOpeningScreen());
+        
     }
     public void Update()
     {
@@ -66,16 +86,16 @@ public class MenuManage : MonoBehaviour
             if(detectedPose != null)
             {
                 TriggerEasterEgg();
-            }
-            // if (Random.value <= chanceToShow)
-            // {
-            //     TriggerEasterEgg();
-            // }
-            // StartCoroutine(ShowEsterEgg());
-                
+            }                
         }
-        // CloseOptionMenu();
         isEnter();
+
+        if(!isOpeningScreen && !isTut2OpenedFlag && BagManageScript.isBagOpen)
+        {
+            StartCoroutine(ShowTutScreen2());
+            isTut2OpenedFlag = true;
+        }
+        
     }
     #endregion
 
@@ -95,13 +115,42 @@ public class MenuManage : MonoBehaviour
         yield return StartCoroutine(FadeCanvasGroup(blackBackgroundCanvasGroup, 1f, 0f, splashDuration));
         openingScreen.SetActive(false);
         BlackBackground.SetActive(false);
+        isOpeningScreen = false;
         // yield return StartCoroutine(ShowMainMenu());
+        TutScreen1.SetActive(true);
 
-        if(hintText != null)
-        {
-            hintText.SetActive(true);
-            Debug.Log("Click right hand button to open the bag");
-        }
+        StartCoroutine(ShowTutScreen1());
+
+    }
+
+    private IEnumerator ShowTutScreen1()
+    {   
+        Debug.Log("ShowTutScreen1() called");
+        isTutScreenOpenedFlag = true;
+
+        // Fade in the opening screen
+        yield return StartCoroutine(FadeCanvasGroup(TutScreen1CanvasGroup, 0f, 1f, fadeDuration));
+        yield return new WaitForSeconds(TutSplashDuration);
+        
+        // Fade out the opening screen and black background
+        yield return StartCoroutine(FadeCanvasGroup(TutScreen1CanvasGroup, 1f, 0f, fadeDuration));
+        TutScreen1.SetActive(false);
+        isTutScreenOpenedFlag = false;
+    }
+    
+    private IEnumerator ShowTutScreen2()
+    {   
+        Debug.Log("ShowTutScreen2() called");
+        isTutScreenOpenedFlag = true;
+        TutScreen2.SetActive(true);
+        // Fade in the opening screen
+        yield return StartCoroutine(FadeCanvasGroup(TutScreen2CanvasGroup, 0f, 1f, fadeDuration));
+        yield return new WaitForSeconds(TutSplashDuration);
+        
+        // Fade out the opening screen and black background
+        yield return StartCoroutine(FadeCanvasGroup(TutScreen2CanvasGroup, 1f, 0f, fadeDuration));
+        TutScreen2.SetActive(false);
+        isTutScreenOpenedFlag = false;
     }
 
     private void TriggerEasterEgg()
@@ -145,23 +194,6 @@ public class MenuManage : MonoBehaviour
     {
         Debug.Log("QUIT!");
         Application.Quit();
-    }
-
-    public void CloseOptionMenu()
-    {
-        if (Input.GetMouseButtonDown(0)) // Detect left-click
-        {
-            Vector2 mousePosition = Input.mousePosition;
-
-            // Check if the mouse is outside the darker image
-            if (!RectTransformUtility.RectangleContainsScreenPoint(optionArea, mousePosition))
-            {
-                Debug.Log("Clicked outside the darker area, returning to main menu.");
-                mainMenu.SetActive(true);
-                optionMenu.SetActive(false);
-
-            }
-        }
     }
 
     private void isEnter()
