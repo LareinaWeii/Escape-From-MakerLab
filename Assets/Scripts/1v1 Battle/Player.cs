@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Leap;
 
-[RequireComponent(typeof(PlayerController))]
+[RequireComponent(typeof(OnmiController))]
 
 public class NewBehaviourScript : LivingEntilty
 {
@@ -16,7 +16,7 @@ public class NewBehaviourScript : LivingEntilty
     public float moveSpeed = 5f;
     private Vector3 inputMove;
     private Vector3 moveVelocity;
-    PlayerController playerController;
+    OnmiController playerController;
     private float initialY;
 
     [Header("Mini Game Manager")]
@@ -35,7 +35,7 @@ public class NewBehaviourScript : LivingEntilty
         base.Start();
         mainSystem = GameObject.Find("Game Manager").GetComponent<MainSystem>();
 
-        playerController = GetComponent<PlayerController>();
+        playerController = GetComponent<OnmiController>();
         plane = new Plane(Vector3.up, Vector3.zero);
         gunController = GetComponent<GunController>();
 

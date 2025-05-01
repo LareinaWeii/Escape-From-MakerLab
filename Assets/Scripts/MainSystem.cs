@@ -20,12 +20,17 @@ public class MainSystem : MonoBehaviour
     public GameObject FlipColorCubeGame;
     public GameObject[] miniGamesLeapPos;
     public List<int> gamePass = new List<int>();
+
+    [Header("Game State")]
+    public GameObject FinalChoice;
+    public int gameState = 0; // 0: In process, 1: Retry, 2: Over
     
 
     [Header("HighLighter")]
     public BoltBoxHighlighter boltBoxHighlighter;
     public ColorfulCabiantHighlighter colorfulCabiantHighlighter;
     public SentryHighlighter sentryHighlighter;
+    public DoorHighlighter doorHighlighter;
 
     enum SceneID
     {
@@ -93,12 +98,18 @@ public class MainSystem : MonoBehaviour
                 gamePass[2] = 2;
                 LoadMiniGameScene(FlipColorCubeGame, SceneID.FlipColorScene);
             }
-            else
+        }
+
+        bool passAllGames = CheckAllPass();
+        Debug.Log("passAllGames: " + passAllGames);
+        if (passAllGames)
+        {
+            Debug.Log("All games passed!");
+            if ((DetectClick() && doorHighlighter.IsCurrentlyHighlighted()) || Input.GetKeyDown(KeyCode.E))
             {
-                Debug.Log("Click detected, but no game highlighted!");
+                FinalChoice.SetActive(true);
             }
         }
-        
     }
 
     bool DetectClick()
@@ -106,7 +117,7 @@ public class MainSystem : MonoBehaviour
         HandPoseScriptableObject detectedPose = PointDetector.GetCurrentlyDetectedPose();
         if (detectedPose != null)
         {
-            Debug.Log("Detected pose: " + detectedPose.name + " Enter MiniGame!");
+            // Debug.Log("Detected pose: " + detectedPose.name + " Enter MiniGame!");
             return true;
         }
         return false;
@@ -191,6 +202,17 @@ public class MainSystem : MonoBehaviour
             Debug.Log("LeapServiceProvider scaled to: " + leapServiceProvider.transform.localScale);
         }
         else Debug.LogError("LeapServiceProvider is not assigned!");
+    }
+
+    private bool CheckAllPass()
+    {
+        Debug.Log("CheckAllPass: gamePass[0]: " + gamePass[0] + " gamePass[1]: " + gamePass[1] + " gamePass[2]: " + gamePass[2]);
+        if (gamePass[0] == 1 && gamePass[1] == 1 && gamePass[2] == 1)
+        {
+            return true;
+        }
+        Debug.Log("Passed Not all!");
+        return false;
     }
 
 }

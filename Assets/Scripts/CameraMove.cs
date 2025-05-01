@@ -25,7 +25,7 @@ public class CameraMove : MonoBehaviour
     public GameObject player;
     public GameObject playerCam; // The camera that follows the player
 
-    private BagManage bagManage;
+    // private BagManage bagManage;
     
     //movement
     private float currentSpeed = 0f;
@@ -36,6 +36,8 @@ public class CameraMove : MonoBehaviour
 
     private float TargetRotationX = 0f; // Target X-axis rotation
     private float CurrentRotationX = 0f; // Current X-axis rotation
+
+    private MainSystem mainSystem;
     
 
     private RotationType camRotationDir = RotationType.NoRotation; // Type of rotation for the camera
@@ -48,7 +50,8 @@ public class CameraMove : MonoBehaviour
 
     void Start()
     {
-        bagManage = GameObject.Find("BagManager").GetComponent<BagManage>();
+        mainSystem = GameObject.Find("Game Manager").GetComponent<MainSystem>();
+        // bagManage = GameObject.Find("BagManager").GetComponent<BagManage>();
     }
 
     void Update()
@@ -99,6 +102,7 @@ public class CameraMove : MonoBehaviour
                 {
                     TargetRotationY = 0f;
                     float current_rotation_x = playerCam.transform.rotation.eulerAngles.x;
+                    // Debug.Log("Current X Rotation: " + current_rotation_x);
 
                     // Check Pitch Rotation
                     if (leftHandScreenPos.y <= Screen.height * screenEdgeThreshold_H)
@@ -110,7 +114,7 @@ public class CameraMove : MonoBehaviour
                     else if (leftHandScreenPos.y >= Screen.height * (1-screenEdgeThreshold_H))
                     {
                         // Debug.Log("Hand is in the top 1/10 of the screen");
-                        if ((current_rotation_x < 340) && (current_rotation_x > 320)) TargetRotationX = 0f;
+                        if ((current_rotation_x < 330) && (current_rotation_x > 310)) TargetRotationX = 0f;
                         else TargetRotationX = -rotationSpeed_X;
                     }
                     else
@@ -126,8 +130,13 @@ public class CameraMove : MonoBehaviour
                 TargetRotationY = 0f;
             }
         }
+        else
+        {
+            TargetRotationX = 0f;
+            TargetRotationY = 0f;
+        }
 
-        if(!bagManage.isBagOpen)
+        if(mainSystem.gameState == 0)
         {
             // Rotation
             CurrentRotationY = Mathf.Lerp(CurrentRotationY, TargetRotationY, Time.deltaTime * rotationSpeed_Y);

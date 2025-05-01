@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 
-public class PlayerController : MonoBehaviour
+public class OnmiController : MonoBehaviour
 {
     Rigidbody rig;
     Vector3 velocity;

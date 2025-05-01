@@ -11,12 +11,15 @@ public class ColorfulCabiantHighlighter : MonoBehaviour
     public float highlightDistance = 1.0f;
     public Color highlightColor = Color.white;
 
+    private MainSystem mainSystem;
     private List<Material> CabiantMaterials = new List<Material>();
     private List<Color> originalColors = new List<Color>();
     private bool isHighlighted = false;
 
     void Start()
     {
+        mainSystem = GameObject.Find("Game Manager").GetComponent<MainSystem>();
+
         Transform[] childTransforms = GetComponentsInChildren<Transform>();
         foreach (Transform child in childTransforms)
         {
@@ -48,13 +51,16 @@ public class ColorfulCabiantHighlighter : MonoBehaviour
         float distance = Vector3.Distance(player.position, transform.position);
         // Debug.Log("Cabiant Distance to player: " + distance);
 
-        if (distance <= highlightDistance && !isHighlighted)
+        if (mainSystem.gamePass[0] == 1 && mainSystem.gamePass[1] == 1)
         {
-            Highlight(true);
-        }
-        else if (distance > highlightDistance && isHighlighted)
-        {
-            Highlight(false);
+            if (distance <= highlightDistance && !isHighlighted)
+            {
+                Highlight(true);
+            }
+            else if (distance > highlightDistance && isHighlighted)
+            {
+                Highlight(false);
+            }
         }
     }
 
